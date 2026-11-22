@@ -8,8 +8,8 @@ from insightface.app import FaceAnalysis
 MAX_IMAGE_DIMENSION = 640
 
 #  Load InsightFace model once (module-level singleton) 
-running_on_railway = os.environ.get("RUNNING_ON_RAILWAY", "").lower() == "true"
-target_device = -1 if running_on_railway else 0
+running_on_hosting = os.environ.get("RUNNING_ON_HOSTING", "").lower() == "true"
+target_device = -1 if running_on_hosting else 0
 providers = (
     ["CPUExecutionProvider"]
     if running_on_railway

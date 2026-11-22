@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiMe, apiRefresh, apiLogout } from "../services/api.js";
+import { apiMe, apiRefresh, apiLogout, SESSION_EXPIRED_EVENT } from "../services/api.js";
+import { getSafeInternalPath } from "../utils/navigation.js";
 
 const AuthContext = createContext(null);
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
@@ -45,7 +46,8 @@ export function AuthProvider({ children }) {
 
   // On every page load, ask the backend if the cookie is still valid.
   // If the access token is expired, apiMe returns null and we try refresh.
-  // If refresh also fails, we clear local state and send them to /login.
+  // Only an explicit refresh rejection clears the saved identity; network
+  // failures leave it intact so a transient outage does not sign users out.
   useEffect(() => {
     let cancelled = false;
 
@@ -81,19 +83,15 @@ export function AuthProvider({ children }) {
           localStorage.setItem("is_admin", String(!!data.is_admin));
         } else {
           // access token cookie missing or invalid → try refresh
-          try {
-            const refreshed = await apiRefresh();
-            if (cancelled) return;
-            if (refreshed && refreshed.user_id) {
-              const fresh = { fullName: refreshed.full_name, userId: String(refreshed.user_id), email: refreshed.email, isAdmin: !!refreshed.is_admin };
-              setUser(fresh);
-              localStorage.setItem("full_name", refreshed.full_name);
-              localStorage.setItem("user_id",   String(refreshed.user_id));
-              localStorage.setItem("is_admin", String(!!refreshed.is_admin));
-            } else {
-              clearLocal();
-            }
-          } catch {
+          const refreshed = await apiRefresh();
+          if (cancelled) return;
+          if (refreshed && refreshed.user_id) {
+            const fresh = { fullName: refreshed.full_name, userId: String(refreshed.user_id), email: refreshed.email, isAdmin: !!refreshed.is_admin };
+            setUser(fresh);
+            localStorage.setItem("full_name", refreshed.full_name);
+            localStorage.setItem("user_id",   String(refreshed.user_id));
+            localStorage.setItem("is_admin", String(!!refreshed.is_admin));
+          } else {
             clearLocal();
           }
         }
@@ -109,7 +107,16 @@ export function AuthProvider({ children }) {
     return () => { cancelled = true; };
   }, [clearLocal, navigate]);
 
-  function login(data, adminMode) {
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      clearLocal();
+      navigate("/login", { replace: true });
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+  }, [clearLocal, navigate]);
+
+  function login(data, adminMode, returnTo, deferNavigation = false) {
     // data = { message, user_id, full_name }  — NO access_token in the body
     // The access + refresh cookies were already set by the server on this response.
     const fresh = {
@@ -127,7 +134,13 @@ export function AuthProvider({ children }) {
     const mode = adminMode ? "admin" : "user";
     setLoginMode(mode);
     localStorage.setItem(LOGIN_MODE_KEY, mode);
-    navigate(adminMode ? "/dashboard" : "/");
+    if (!deferNavigation) {
+      const safeReturnTo = getSafeInternalPath(returnTo);
+      const adminDestination = safeReturnTo === "/admin" || safeReturnTo?.startsWith("/admin/")
+        ? safeReturnTo
+        : "/admin";
+      navigate(adminMode ? adminDestination : (safeReturnTo || "/"), { replace: true });
+    }
   }
 
   function updateProfile(data) {

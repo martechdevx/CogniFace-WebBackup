@@ -723,3 +723,131 @@
   .accessCard { padding: 29px 24px; }
   .accessCard h1 { font-size: 26px; }
 }
+
+.workspacePage {
+  width: min(1180px, calc(100% - 40px));
+  min-height: calc(100vh - var(--nav-h));
+  margin: 0 auto;
+  padding: 34px 0 64px;
+  color: var(--text);
+  animation: enrollmentEnter 420ms ease both;
+}
+
+.workspaceHeader { max-width: 680px; margin-bottom: 21px; }
+.workspaceEyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--blue); font-size: 10px; font-weight: 800; letter-spacing: 1.3px; }
+.workspaceEyebrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px var(--green-glow); }
+.workspaceHeader h1 { margin-top: 9px; color: var(--text); font-size: clamp(29px, 3.4vw, 40px); font-weight: 650; letter-spacing: -1.4px; }
+.workspaceHeader p { max-width: 670px; margin-top: 8px; color: var(--text-muted); font-size: 13px; line-height: 1.7; }
+.workspaceProgress { margin-bottom: 16px; padding: 13px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); }
+.progressTop { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+.progressLabel { color: var(--text); font-size: 11px; font-weight: 700; }
+.progressValue { color: var(--text-muted); font-size: 10px; }
+.progressTrack { height: 5px; border-radius: 99px; background: var(--surface-soft); overflow: hidden; }
+.progressFill { border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--cyan)); transition: width 250ms ease; }
+.workspaceGrid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, .75fr); align-items: start; gap: 16px; }
+.workspaceForm,.workspaceAside { display: flex; min-width: 0; flex-direction: column; gap: 14px; }
+.workspaceCard { min-width: 0; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--card-bg); box-shadow: var(--shadow-sm); }
+.workspaceSectionHeader { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; }
+.workspaceSectionIcon { display: grid; width: 36px; height: 36px; flex: 0 0 auto; place-items: center; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-soft); color: var(--blue); font-size: 15px; }
+.workspaceSectionHeader h2 { color: var(--text); font-size: 14px; font-weight: 700; letter-spacing: -.2px; }
+.workspaceSectionHeader p { margin-top: 4px; color: var(--text-muted); font-size: 10px; line-height: 1.5; }
+.workspaceFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+.workspaceField { display: flex; min-width: 0; flex-direction: column; gap: 6px; color: var(--text); font-size: 10px; font-weight: 700; }
+.workspaceField input,.workspaceField select { width: 100%; min-width: 0; min-height: 41px; padding: 0 11px; border: 1px solid var(--border-2); border-radius: 7px; outline: none; background: var(--card-bg); color: var(--text); font-size: 12px; }
+.workspaceField input:focus,.workspaceField select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+.workspaceField input:disabled,.workspaceField select:disabled { opacity: .7; }
+.workspaceError { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 14px; padding: 10px 12px; border: 1px solid #f2c9c9; border-radius: 7px; background: #fff5f4; color: #a63e3e; font-size: 11px; line-height: 1.5; }
+.workspaceError svg { flex: 0 0 auto; margin-top: 1px; }
+.workspaceSlots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.workspaceSlot { position: relative; display: flex; min-width: 0; aspect-ratio: 1 / 1; flex-direction: column; align-items: center; justify-content: center; gap: 7px; overflow: hidden; padding: 11px; border: 1px dashed var(--border-2); border-radius: 9px; background: var(--surface-soft); text-align: center; transition: border-color 160ms ease, background 160ms ease, transform 160ms ease; }
+.workspaceSlot:hover,.workspaceSlotDragOver { border-color: var(--blue); background: var(--surface-strong); }
+.workspaceSlotDragOver { transform: scale(1.015); }
+.workspaceSlotSelected { border-style: solid; border-color: var(--blue); }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
+.workspaceSlotImage { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: enrollmentEnter 260ms ease both; }
+.workspaceSlotSelected::after { position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, rgb(8 23 45 / 82%)); content: ""; pointer-events: none; }
+.workspaceSlotIcon { display: grid; width: 35px; height: 35px; place-items: center; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); color: var(--blue); font-size: 16px; }
+.workspaceSlotActions { position: relative; z-index: 1; display: flex; width: 100%; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px; }
+.workspaceSlotPick,.workspaceSlotCamera { display: inline-flex; min-height: 29px; align-items: center; justify-content: center; gap: 5px; padding: 0 7px; border: 1px solid var(--border); border-radius: 6px; background: var(--card-bg); color: var(--text); font: 700 8px var(--font-body); cursor: pointer; }
+.workspaceSlotPick svg,.workspaceSlotCamera svg { font-size: 11px; }
+.workspaceSlotCamera:disabled { cursor: wait; opacity: .6; }
+.workspaceSlotSelected .workspaceSlotPick { border-color: rgb(255 255 255 / 45%); background: rgb(8 23 45 / 65%); color: #fff; }
+.workspaceSlotSelected .workspaceSlotCamera { border-color: rgb(255 255 255 / 45%); background: rgb(8 23 45 / 65%); color: #fff; }
+.workspaceSlotStatus { position: relative; z-index: 1; overflow: hidden; max-width: 100%; color: var(--text-muted); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.workspaceSlotSelected .workspaceSlotStatus { color: rgb(255 255 255 / 86%); }
+.workspaceSlotRemove { position: absolute; z-index: 2; top: 6px; right: 6px; display: inline-flex; min-height: 25px; align-items: center; gap: 4px; padding: 0 7px; border: 0; border-radius: 5px; background: rgb(255 255 255 / 92%); color: #a63e3e; font-size: 8px; font-weight: 700; cursor: pointer; }
+.workspaceSlotRemove:disabled { opacity: .6; cursor: wait; }
+.workspaceHint { display: flex; align-items: flex-start; gap: 6px; margin: 11px 0 0; color: var(--text-muted); font-size: 9px; line-height: 1.5; }
+.workspaceHint svg { flex: 0 0 auto; color: var(--blue); }
+.workspaceProcessing { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-soft); color: var(--blue); }
+.workspaceProcessing > svg { flex: 0 0 auto; animation: spin-slow 1s linear infinite; }
+.workspaceProcessing span { display: flex; flex-direction: column; gap: 3px; }
+.workspaceProcessing strong { color: var(--text); font-size: 10px; }
+.workspaceProcessing small { color: var(--text-muted); font-size: 9px; line-height: 1.5; }
+.workspaceSpinner { animation: spin-slow 1s linear infinite; }
+.primaryButton,.secondaryButton { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 8px; padding: 0 13px; border: 1px solid transparent; border-radius: 7px; font: 700 10px var(--font-body); text-decoration: none; cursor: pointer; transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease; }
+.primaryButton { margin-top: 14px; background: var(--blue); color: #fff; }
+.primaryButton:hover:not(:disabled) { transform: translateY(-1px); background: #0e4fd6; box-shadow: var(--shadow-blue); }
+.primaryButton:disabled { opacity: .62; cursor: wait; }
+.primaryButton svg,.secondaryButton svg { font-size: 13px; }
+.secondaryButton { border-color: var(--border); background: var(--card-bg); color: var(--text); }
+.secondaryButton:hover { border-color: var(--blue); color: var(--blue); }
+.workspacePreview { position: relative; display: grid; min-height: 215px; aspect-ratio: 4 / 3; place-items: center; overflow: hidden; border: 1px dashed var(--border-2); border-radius: 9px; background: var(--surface-soft); }
+.workspacePreview > img { width: 100%; height: 100%; object-fit: cover; animation: enrollmentEnter 260ms ease both; }
+.workspacePreview > div:not(.workspacePreviewControls) { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text-muted); font-size: 10px; }
+.workspacePreview > div > svg { color: var(--blue); font-size: 27px; }
+.workspacePreviewControls { position: absolute; right: 9px; bottom: 9px; left: 9px; display: flex; align-items: center; justify-content: space-between; }
+.workspacePreviewControls button { width: 29px; height: 29px; border: 1px solid var(--border); border-radius: 50%; background: var(--card-bg); color: var(--text); font-size: 18px; line-height: 1; }
+.workspacePreviewControls span { padding: 4px 8px; border-radius: 99px; background: var(--card-bg); color: var(--text); font-size: 9px; }
+.workspaceInfoCard { padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-soft); }
+.workspaceInfoCard h2 { display: flex; align-items: center; gap: 7px; color: var(--text); font-size: 11px; }
+.workspaceInfoCard h2 svg { color: var(--blue); }
+.workspaceInfoCard p { margin-top: 8px; color: var(--text-muted); font-size: 9px; line-height: 1.65; }
+.successDetails { display: flex; width: 100%; flex-direction: column; gap: 7px; padding: 13px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-soft); color: var(--text-muted); font-size: 10px; text-align: left; }
+.successDetails span:first-child { color: var(--text); font-weight: 700; }
+.statusActions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; margin-top: 6px; }
+.textButton { padding: 8px; border: 0; background: transparent; color: var(--text-muted); font: 700 9px var(--font-body); cursor: pointer; }
+.textButton:hover { color: var(--blue); }
+.enrollmentStatusCard .workspaceEyebrow { margin-top: 2px; }
+.enrollmentStatusCard .workspaceEyebrow + h1 { margin-top: -3px; }
+
+:global(:root[data-theme="dark"]) .workspaceField { color: var(--text); }
+:global(:root[data-theme="dark"]) .workspaceSlotPick { border-color: var(--border); background: #15253b; color: var(--text); }
+:global(:root[data-theme="dark"]) .workspaceSlotSelected .workspaceSlotPick { border-color: rgb(255 255 255 / 45%); background: rgb(8 23 45 / 75%); color: #fff; }
+:global(:root[data-theme="dark"]) .workspaceSlotRemove { background: #fff; color: #a63e3e; }
+:global(:root[data-theme="dark"]) .workspaceError { border-color: rgb(248 113 113 / 20%); background: rgb(127 29 29 / 13%); color: #ffaaa6; }
+
+@media (max-width: 860px) {
+  .workspaceGrid { grid-template-columns: minmax(0, 1.15fr) minmax(250px, .85fr); }
+  .workspacePage { width: min(100% - 32px, 720px); }
+  .workspaceSlot { aspect-ratio: .95 / 1; padding: 8px; }
+}
+
+@media (max-width: 680px) {
+  .workspacePage { width: calc(100% - 28px); padding: 27px 0 48px; }
+  .workspaceHeader { margin-bottom: 17px; }
+  .workspaceHeader h1 { font-size: 30px; letter-spacing: -1px; }
+  .workspaceHeader p { font-size: 11px; }
+  .workspaceGrid { grid-template-columns: 1fr; }
+  .workspaceAside { grid-row: 2; }
+  .workspaceSlots { grid-template-columns: 1fr; }
+  .workspaceSlot { min-height: 132px; aspect-ratio: auto; }
+  .workspacePreview { min-height: 190px; }
+  .workspaceCard { padding: 16px; }
+  .workspaceFields { gap: 11px; }
+  .workspaceProgress { padding: 12px; }
+  .progressValue { text-align: right; }
+  .statusActions { flex-direction: column; }
+  .statusActions > * { width: 100%; }
+}
+
+@media (max-width: 420px) {
+  .workspaceFields { grid-template-columns: 1fr; }
+  .workspacePage { width: calc(100% - 24px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspacePage,.workspaceSlotImage,.workspacePreview > img { animation: none; }
+  .workspaceSlot,.primaryButton,.secondaryButton { transition: none; }
+  .workspaceSpinner,.workspaceProcessing > svg { animation: none; }
+}

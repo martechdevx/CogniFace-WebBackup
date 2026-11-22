@@ -65,6 +65,42 @@ def enrollment_status(
     }
 
 
+@router.get("/profile")
+def enrollment_profile(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    claim = db.query(EnrollmentClaim).filter(
+        EnrollmentClaim.user_id == current_user.id,
+    ).first()
+    faces = (
+        db.query(EnrolledFace)
+        .filter(EnrolledFace.enrolled_by == current_user.id)
+        .order_by(EnrolledFace.enrolled_at.asc(), EnrolledFace.id.asc())
+        .all()
+    )
+    first_face = faces[0] if faces else None
+    return {
+        "enrolled": first_face is not None,
+        "in_progress": claim is not None and first_face is None,
+        "full_name": first_face.full_name if first_face else None,
+        "gender": first_face.gender if first_face else None,
+        "program": first_face.program if first_face else None,
+        "matric_number": first_face.matric_number if first_face else None,
+        "enrolled_at": first_face.enrolled_at if first_face else None,
+        "face_count": len(faces),
+        "images": [
+            {
+                "id": face.id,
+                "image_base64": face.image_base64,
+                "content_type": "image/png" if face.image_base64.startswith("iVBOR") else "image/jpeg",
+                "enrolled_at": face.enrolled_at,
+            }
+            for face in faces
+        ],
+    }
+
+
 @router.post("/", response_model=List[EnrollResponse], status_code=status.HTTP_201_CREATED)
 def enroll_face(
     payload: EnrollRequest,

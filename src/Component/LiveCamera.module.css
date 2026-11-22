@@ -1,0 +1,115 @@
+.backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(5 13 24 / 76%);
+  backdrop-filter: blur(9px);
+  animation: cameraFadeIn 180ms ease both;
+}
+
+.modal {
+  display: flex;
+  max-height: calc(100dvh - 32px);
+  flex-direction: column;
+  width: min(560px, 100%);
+  overflow: auto;
+  border: 1px solid rgb(148 197 253 / 20%);
+  border-radius: 17px;
+  background: #101f34;
+  color: #edf3fb;
+  box-shadow: 0 28px 90px rgb(0 0 0 / 48%), 0 0 60px rgb(21 94 239 / 10%);
+  animation: cameraModalIn 240ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 19px;
+  border-bottom: 1px solid rgb(237 243 251 / 9%);
+}
+
+.titleGroup { display: flex; min-width: 0; align-items: center; gap: 11px; }
+.titleIcon { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border: 1px solid rgb(53 230 172 / 20%); border-radius: 11px; background: rgb(53 230 172 / 8%); color: #77e7b5; font-size: 17px; }
+.titleGroup h2 { font-size: 15px; font-weight: 700; }
+.titleGroup p { margin-top: 4px; color: #9eafc6; font-size: 10px; }
+.closeButton,.switchButton { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border: 1px solid rgb(237 243 251 / 12%); border-radius: 9px; background: rgb(255 255 255 / 4%); color: #d7e3f3; font-size: 16px; }
+.closeButton:hover,.switchButton:hover { border-color: rgb(53 230 172 / 40%); background: rgb(53 230 172 / 8%); }
+
+.previewFrame {
+  position: relative;
+  display: grid;
+  min-height: 260px;
+  max-height: min(60vh, 480px);
+  aspect-ratio: 4 / 3;
+  place-items: center;
+  overflow: hidden;
+  margin: 18px 19px 0;
+  border: 1px solid rgb(148 197 253 / 14%);
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgb(21 94 239 / 13%), transparent 58%),
+    #07111f;
+}
+
+.video,.capturedPhoto { display: block; width: 100%; height: 100%; object-fit: contain; }
+.video { transform: translateZ(0); }
+.capturedPhoto { animation: cameraPhotoIn 220ms ease both; }
+.loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px; color: #c9d7e9; font-size: 11px; }
+.loading > span { width: 35px; height: 35px; border: 2px solid rgb(103 232 249 / 17%); border-top-color: #67e8f9; border-radius: 50%; animation: cameraSpin 850ms linear infinite; }
+.cameraError { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; padding: 22px; background: #0a1626; text-align: center; }
+.cameraError > span { display: grid; width: 43px; height: 43px; place-items: center; border: 1px solid rgb(248 113 113 / 22%); border-radius: 50%; background: rgb(248 113 113 / 8%); color: #ff9a9a; font-size: 18px; }
+.cameraError strong { color: #edf3fb; font-size: 13px; }
+.cameraError p { max-width: 330px; color: #a9b9ce; font-size: 10px; line-height: 1.6; }
+.retryButton { display: inline-flex; min-height: 35px; align-items: center; gap: 7px; margin-top: 4px; padding: 0 11px; border: 1px solid rgb(148 197 253 / 18%); border-radius: 7px; background: rgb(255 255 255 / 5%); color: #d7e3f3; font-size: 10px; }
+
+.faceGuide { position: absolute; inset: 13% 27%; border: 1px solid rgb(103 232 249 / 33%); border-radius: 46% 46% 42% 42% / 38% 38% 58% 58%; box-shadow: 0 0 34px rgb(21 94 239 / 12%); pointer-events: none; }
+.faceGuide i { position: absolute; width: 18px; height: 18px; border-color: #67e8f9; border-style: solid; opacity: .8; }
+.faceGuide i:nth-child(1) { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-radius: 5px 0 0; }
+.faceGuide i:nth-child(2) { top: -1px; right: -1px; border-width: 2px 2px 0 0; border-radius: 0 5px 0 0; }
+.faceGuide i:nth-child(3) { right: -1px; bottom: -1px; border-width: 0 2px 2px 0; border-radius: 0 0 5px; }
+.faceGuide i:nth-child(4) { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; border-radius: 0 0 0 5px; }
+.liveBadge { position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid rgb(255 255 255 / 15%); border-radius: 6px; background: rgb(5 13 24 / 66%); color: #d7e3f3; font-size: 8px; font-weight: 800; letter-spacing: .9px; backdrop-filter: blur(8px); }
+.liveBadge i,.statusDot { width: 6px; height: 6px; flex: 0 0 auto; border-radius: 50%; background: #6ee7b7; box-shadow: 0 0 10px rgb(110 231 183 / 70%); }
+
+.instructions { display: flex; align-items: center; gap: 8px; padding: 13px 20px 2px; color: #a9b9ce; font-size: 10px; }
+.controls { display: flex; align-items: center; gap: 9px; padding: 16px 19px 19px; }
+.controls > :first-child { margin-right: auto; }
+.primaryButton,.secondaryButton { display: inline-flex; min-height: 41px; align-items: center; justify-content: center; gap: 7px; padding: 0 13px; border: 1px solid transparent; border-radius: 8px; font: 700 10px var(--font-body); cursor: pointer; transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease; }
+.primaryButton { background: linear-gradient(110deg, #155eef, #087e91 58%, #158a66); color: #fff; box-shadow: 0 6px 19px rgb(21 94 239 / 22%); }
+.primaryButton:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 9px 24px rgb(21 94 239 / 32%); }
+.primaryButton:disabled { cursor: wait; opacity: .5; }
+.secondaryButton { border-color: rgb(237 243 251 / 13%); background: rgb(255 255 255 / 4%); color: #c9d7e9; }
+.secondaryButton:hover { border-color: rgb(148 197 253 / 30%); background: rgb(255 255 255 / 7%); }
+
+@keyframes cameraFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cameraModalIn { from { opacity: 0; transform: translateY(9px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes cameraPhotoIn { from { opacity: 0; transform: scale(1.015); } to { opacity: 1; transform: scale(1); } }
+@keyframes cameraSpin { to { transform: rotate(360deg); } }
+
+@media (max-width: 560px) {
+  .backdrop { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
+  .modal { width: min(100%, 440px); border-radius: 13px; }
+  .header { padding: 13px 14px; }
+  .previewFrame { min-height: 210px; max-height: 52vh; margin: 12px 12px 0; }
+  .instructions { padding: 11px 14px 0; line-height: 1.5; }
+  .controls { flex-wrap: wrap; padding: 13px 12px 14px; }
+  .controls > :first-child { margin-right: 0; }
+  .controls > button { flex: 1 1 auto; min-height: 44px; }
+  .switchButton { width: 44px; flex: 0 0 44px !important; }
+}
+
+@media (max-width: 360px) {
+  .controls { gap: 7px; }
+  .controls > button { padding-inline: 9px; font-size: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,.modal,.capturedPhoto { animation: none; }
+  .loading > span { animation-duration: 2s; }
+  .primaryButton,.secondaryButton,.closeButton,.switchButton { transition: none; }
+}

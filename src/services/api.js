@@ -1,7 +1,20 @@
 import CryptoJS from "crypto-js";
 
-const BASE_URL = import.meta.env.VITE_API_URL
-  || `${window.location.protocol}//${window.location.hostname}:8000`;
+const configuredApiUrl = import.meta.env.VITE_API_URL;
+const localHosts = new Set(["localhost", "127.0.0.1"]);
+const configuredApi = configuredApiUrl
+  ? new URL(configuredApiUrl, window.location.origin)
+  : null;
+
+if (configuredApi && localHosts.has(window.location.hostname) && localHosts.has(configuredApi.hostname)) {
+  // localhost and 127.0.0.1 are different cookie sites in the browser.
+  configuredApi.hostname = window.location.hostname;
+  configuredApi.protocol = window.location.protocol;
+}
+
+const BASE_URL = configuredApi
+  ? configuredApi.toString().replace(/\/$/, "")
+  : `${window.location.protocol}//${window.location.hostname}:8000`;
 const MAX_IMAGE_SIZE_BYTES = 100 * 1024;
 const MAX_IMAGE_DIMENSION = 640;
 
@@ -115,17 +128,36 @@ export async function apiLogin(email, password, adminMode = false) {
   }
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.detail || "Login failed.");
+  if (!res.ok) {
+    const error = new Error(data.detail || "Login failed.");
+    error.status = res.status;
+    throw error;
+  }
   return data; // { message, user_id, full_name } — NO token in body (it's an HttpOnly cookie)
 }
 
-export async function apiRefresh() {
-  const res = await fetch(`${BASE_URL}/auth/refresh`, {
-    method: "POST",
-    credentials: "include",   // sends the refresh_token cookie automatically
-  });
-  if (!res.ok) return null;   // return null instead of throwing — caller decides what to do
-  return res.json();          // { message, user_id, full_name }
+export const SESSION_EXPIRED_EVENT = "cogniface:session-expired";
+
+let refreshRequest = null;
+export function apiRefresh() {
+  if (!refreshRequest) {
+    refreshRequest = (async () => {
+      const res = await fetch(`${BASE_URL}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.status === 401) return null;
+      if (!res.ok) {
+        const error = new Error("Could not refresh the session right now.");
+        error.status = res.status;
+        throw error;
+      }
+      return res.json();
+    })().finally(() => {
+      refreshRequest = null;
+    });
+  }
+  return refreshRequest;
 }
 
 export async function apiLogout() {
@@ -136,13 +168,14 @@ export async function apiLogout() {
 
 // Returns user data if the access token cookie is valid, or null if not.
 export async function apiMe() {
-  try {
-    const res = await fetch(`${BASE_URL}/auth/me`, { credentials: "include" });
-    if (!res.ok) return null;
-    return res.json(); // { message, user_id, full_name }
-  } catch {
-    return null;
+  const res = await fetch(`${BASE_URL}/auth/me`, { credentials: "include" });
+  if (res.status === 401) return null;
+  if (!res.ok) {
+    const error = new Error("Could not verify the current session.");
+    error.status = res.status;
+    throw error;
   }
+  return res.json(); // { message, user_id, full_name }
 }
 
 // ── Authenticated fetch ───────────────────────────────────────────────────
@@ -156,16 +189,13 @@ async function authFetch(url, options = {}) {
   if (res.status === 401) {
     const refreshed = await apiRefresh();
     if (!refreshed) {
-      // Refresh also failed — clear local identity hints and throw
-      localStorage.removeItem("full_name");
-      localStorage.removeItem("user_id");
+      window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
       throw new Error("Session expired. Please log in again.");
     }
     // Retry the original request — the server has now set a new access cookie
     res = await fetch(url, { ...options, credentials: "include" });
     if (res.status === 401) {
-      localStorage.removeItem("full_name");
-      localStorage.removeItem("user_id");
+      window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
       throw new Error("Session expired. Please log in again.");
     }
   }
@@ -206,6 +236,13 @@ export async function apiEnrollmentStatus() {
   const res = await authFetch(`${BASE_URL}/enroll/status`, {});
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || "Could not check enrollment status.");
+  return data;
+}
+
+export async function apiUserEnrollmentProfile() {
+  const res = await authFetch(`${BASE_URL}/enroll/profile`, {});
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Could not load your enrollment profile.");
   return data;
 }
 

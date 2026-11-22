@@ -34,14 +34,22 @@ logger = logging.getLogger("auth")
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 running_on_railway = os.environ.get("RUNNING_ON_RAILWAY", "").lower() == "true"
+cookie_secure_setting = os.environ.get("AUTH_COOKIE_SECURE")
+cookie_secure = (
+    cookie_secure_setting.lower() == "true"
+    if cookie_secure_setting is not None
+    else running_on_railway
+)
+cookie_samesite = os.environ.get(
+    "AUTH_COOKIE_SAMESITE",
+    "none" if cookie_secure else "lax",
+).lower()
 COOKIE_KWARGS = dict(
     httponly=True,
-    secure=running_on_railway,
-    samesite="none" if running_on_railway else "lax",
+    secure=cookie_secure,
+    samesite=cookie_samesite,
 )
-# ── FIX: samesite="lax" so cookies are sent on cross-origin requests
-#         (Vite dev server → FastAPI). secure=False stays False for HTTP dev.
-# COOKIE_KWARGS = dict(httponly=True, secure=False, samesite="lax")
+
 
 def _issue_tokens(response: Response, db: Session, user: User):
     """Creates a fresh access + refresh token pair, stores the refresh
@@ -58,18 +66,27 @@ def _issue_tokens(response: Response, db: Session, user: User):
     db.add(RefreshToken(token_hash=refresh_hash, user_id=user.id, expires_at=expires_at))
     db.commit()
 
-    # ── FIX: set path="/" on the refresh cookie too so the browser sends it
-    #         to /auth/refresh. With path="/auth" the cookie IS sent to that
-    #         path in theory, but some browsers/fetch clients scope it more
-    #         strictly when the API is cross-origin. "/" is safest for dev.
-    response.set_cookie("access_token",  access_token, max_age=15 * 60,          path="/", **COOKIE_KWARGS)
-    response.set_cookie("refresh_token", raw_refresh,  max_age=7 * 24 * 60 * 60, path="/", **COOKIE_KWARGS)
+    response.set_cookie(
+        "access_token",
+        access_token,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        path="/",
+        **COOKIE_KWARGS,
+    )
+    response.set_cookie(
+        "refresh_token",
+        raw_refresh,
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        path="/",
+        **COOKIE_KWARGS,
+    )
     return access_token
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 def signup(payload: SignupRequest, request: Request, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == payload.email).first()
+    email = str(payload.email).strip().lower()
+    existing = db.query(User).filter(func.lower(User.email) == email).first()
     if existing:
         logger.warning("SIGNUP FAIL for email=%s: email already registered", payload.email)
         log_event(
@@ -81,7 +98,7 @@ def signup(payload: SignupRequest, request: Request, db: Session = Depends(get_d
 
     user = User(
         full_name=payload.full_name,
-        email=payload.email,
+        email=email,
         hashed_password=hash_password(payload.password),
     )
     db.add(user)
@@ -99,7 +116,8 @@ def signup(payload: SignupRequest, request: Request, db: Session = Depends(get_d
 
 @router.post("/login", response_model=LoginResponse)
 def login(payload: LoginRequest, response: Response, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == payload.email).first()
+    email = str(payload.email).strip().lower()
+    user = db.query(User).filter(func.lower(User.email) == email).first()
 
     if not user or not verify_password(payload.password, user.hashed_password):
         logger.warning("LOGIN FAIL for email=%s", payload.email)

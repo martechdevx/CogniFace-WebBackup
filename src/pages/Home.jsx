@@ -1,256 +1,245 @@
-import { Link } from "react-router-dom";
+import { lazy, useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
-  FaArrowDown,
   FaArrowRight,
-  FaBook,
+  FaBolt,
   FaCheck,
-  FaChevronRight,
   FaFingerprint,
   FaLock,
-  FaSearch,
   FaShieldAlt,
   FaUserPlus,
 } from "react-icons/fa";
+import maleFace from "../assets/male-reference.jpg";
+import femaleFace from "../assets/female-reference.jpg";
 import { useAuth } from "../context/AuthContext.jsx";
+import PublicFooter from "../Component/PublicFooter.jsx";
 import styles from "./Home.module.css";
 
-const workflows = [
+const UserDashboard = lazy(() => import("./dashboard/dashboard.jsx").then(module => ({ default: module.UserDashboard })));
+
+const platformFeatures = [
   {
     number: "01",
     icon: FaUserPlus,
-    title: "Build a trusted record",
-    description:
-      "Capture the details your institution needs, then add clear face images to create an enrollment record.",
-    label: "ENROLLMENT",
+    title: "Face Enrollment",
+    copy: "Register your identity with the required details and clear facial images. The backend processes each image and creates a face representation for matching.",
     to: "/enrollment",
+    action: "Explore Enrollment",
   },
   {
     number: "02",
-    icon: FaSearch,
-    title: "Check an identity",
-    description:
-      "Submit a new image and compare it with enrolled records to see the closest match and similarity score.",
-    label: "VERIFICATION",
+    icon: FaFingerprint,
+    title: "Face Verification",
+    copy: "Submit a face image and compare it with enrolled identities to return a possible match and its similarity score.",
     to: "/verification",
+    action: "Explore Verification",
   },
   {
     number: "03",
     icon: FaShieldAlt,
-    title: "Keep work in view",
-    description:
-      "Review activity and manage identity workflows from a single, clear workspace.",
-    label: "OVERVIEW",
-    to: "/dashboard",
+    title: "Technology Blog",
+    copy: "Read about facial recognition, computer vision, identity verification, and the technology behind the CogniFace workflow.",
+    to: "/ourblog",
+    action: "Explore Blog",
   },
 ];
 
-function WorkspacePreview() {
+const workflow = [
+  ["01", "Create your identity", "Submit your personal details and one to three face images."],
+  ["02", "Build your face profile", "The system detects a face and extracts its features to generate an embedding."],
+  ["03", "Verify an identity", "Upload another face image and search for a possible match in enrolled records."],
+];
+
+function FaceDemo() {
+  const [subject, setSubject] = useState("male");
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setSubject(current => current === "male" ? "female" : "male");
+    }, 6800);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const isMale = subject === "male";
+
   return (
-    <div className={styles.productStage} aria-label="Preview of the CogniFace workspace">
-      <div className={styles.stageGlow} />
-      <div className={styles.workspace}>
-        <aside className={styles.workspaceRail} aria-hidden="true">
-          <div className={styles.railMark}><FaFingerprint /></div>
-          <span className={`${styles.railItem} ${styles.railItemActive}`}><FaShieldAlt /></span>
-          <span className={styles.railItem}><FaUserPlus /></span>
-          <span className={styles.railItem}><FaSearch /></span>
-          <span className={styles.railDivider} />
-          <span className={styles.railItem}><FaBook /></span>
-        </aside>
-
-        <div className={styles.workspaceMain}>
-          <div className={styles.workspaceTopbar}>
-            <div className={styles.breadcrumb}><span>Workspace</span><FaChevronRight /><strong>Overview</strong></div>
-            <span className={styles.workspaceAvatar}>CF</span>
-          </div>
-
-          <div className={styles.workspaceIntro}>
-            <span className={styles.workspaceOverline}>COGNIFACE WORKSPACE</span>
-            <h2>Identity overview</h2>
-            <p>A clear view of your enrollment and verification activity.</p>
-          </div>
-
-          <div className={styles.overviewGrid}>
-            <div className={styles.overviewTile}>
-              <span className={styles.tileIcon}><FaUserPlus /></span>
-              <span className={styles.tileLabel}>Enrollment</span>
-              <strong>People records</strong>
-              <small>Manage enrolled identities</small>
-              <span className={styles.tileArrow}><FaArrowRight /></span>
-            </div>
-            <div className={styles.overviewTile}>
-              <span className={`${styles.tileIcon} ${styles.tileIconMint}`}><FaSearch /></span>
-              <span className={styles.tileLabel}>Verification</span>
-              <strong>Find a match</strong>
-              <small>Compare a submitted image</small>
-              <span className={styles.tileArrow}><FaArrowRight /></span>
-            </div>
-          </div>
-
-          <div className={styles.activityPanel}>
-            <div className={styles.activityHead}>
-              <strong>How a check works</strong>
-              <span>THREE CLEAR STEPS</span>
-            </div>
-            <div className={styles.activityRow}>
-              <span className={styles.activityStep}>01</span>
-              <span className={styles.activityCheck}><FaCheck /></span>
-              <span className={styles.activityCopy}><strong>Image received</strong><small>Quality checks help prepare the image</small></span>
-              <span className={styles.activityStatus}>READY</span>
-            </div>
-            <div className={styles.activityRow}>
-              <span className={styles.activityStep}>02</span>
-              <span className={styles.activityCheck}><FaSearch /></span>
-              <span className={styles.activityCopy}><strong>Records compared</strong><small>Check against enrolled identities</small></span>
-              <span className={styles.activityStatus}>MATCH</span>
-            </div>
-            <div className={styles.activityRow}>
-              <span className={styles.activityStep}>03</span>
-              <span className={styles.activityCheck}><FaShieldAlt /></span>
-              <span className={styles.activityCopy}><strong>Result returned</strong><small>Review the closest result</small></span>
-              <span className={styles.activityStatus}>DONE</span>
-            </div>
-          </div>
+    <div className={`${styles.faceStage} ${isMale ? styles.maleStage : styles.femaleStage}`}>
+      <img
+        className={`${styles.demoFace} ${styles.demoFaceMale} ${isMale ? styles.faceActive : ""}`}
+        src={maleFace}
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        className={`${styles.demoFace} ${styles.demoFaceFemale} ${!isMale ? styles.faceActive : ""}`}
+        src={femaleFace}
+        alt=""
+        aria-hidden="true"
+      />
+      <div key={subject} className={styles.scanEffects} aria-hidden="true">
+        <div className={styles.scanGrid} />
+        <div className={styles.detectionFrame}><i /><i /><i /><i /></div>
+        <div className={styles.scanLine} />
+        <div className={styles.landmarks}>
+          {Array.from({ length: 19 }, (_, index) => <i key={index} />)}
         </div>
       </div>
-      <div className={styles.stageAnnotation}>
-        <span><FaLock /></span>
-        <div><strong>Session protection</strong><small>HttpOnly session cookies</small></div>
-      </div>
+      <aside key={`panel-${subject}`} className={styles.resultPanel} aria-label="Facial analysis demonstration">
+        <div className={styles.resultTop}>
+          <span><b /> FACIAL ANALYSIS</span>
+          <small>DEMO</small>
+        </div>
+        <strong>Face detected</strong>
+        <div className={styles.analysisGraph} aria-hidden="true">
+          <svg viewBox="0 0 220 70" role="presentation">
+            <path d="M4 54 C28 53 24 28 51 30 S76 56 101 49 S132 16 153 26 S180 55 216 12" />
+            <circle cx="51" cy="30" r="3" /><circle cx="101" cy="49" r="3" /><circle cx="153" cy="26" r="3" /><circle cx="216" cy="12" r="3" />
+          </svg>
+        </div>
+        <div className={styles.resultRows}>
+          <span><small>Landmarks</small><b>Visualized</b></span>
+          <span><small>Embedding</small><b>Illustrative</b></span>
+          <span><small>Status</small><b>Demonstration</b></span>
+        </div>
+      </aside>
+      <div className={styles.demoLabel}><FaBolt /> Supplied photo demonstration — not a live camera</div>
     </div>
   );
 }
 
 function Home() {
   const { isLoggedIn, user } = useAuth();
+  const location = useLocation();
+  const mainRef = useRef(null);
+
+  useEffect(() => {
+    const root = mainRef.current;
+    if (!root) return undefined;
+    const elements = root.querySelectorAll("[data-reveal]");
+    if (typeof IntersectionObserver === "undefined") {
+      elements.forEach(element => { element.dataset.reveal = "shown"; });
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.dataset.reveal = "shown";
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -24px 0px" });
+    elements.forEach(element => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
 
   if (isLoggedIn) {
     return (
-      <main className={styles.home}>
-        <section className={styles.memberHero}>
-          <div className={styles.memberIntro}>
-            <span className={styles.darkEyebrow}><i /> YOUR COGNIFACE WORKSPACE</span>
-            <h1>Good to have you back, <span>{user?.fullName?.split(" ")[0] || "there"}.</span></h1>
-            <p>Choose a workspace action to continue.</p>
-          </div>
-          <div className={styles.memberActions}>
-            {workflows.map(({ icon: Icon, title, description, to }) => (
-              <Link className={styles.memberAction} key={to} to={to}>
-                <span className={styles.memberActionIcon}><Icon /></span>
-                <span><strong>{title}</strong><small>{description}</small></span>
-                <FaArrowRight className={styles.memberActionArrow} />
-              </Link>
-            ))}
-          </div>
-        </section>
-      </main>
+      <div className={styles.home}>
+        <UserDashboard key={location.key} user={user} />
+        <PublicFooter />
+      </div>
     );
   }
 
   return (
-    <main className={styles.home}>
+    <main ref={mainRef} className={styles.home}>
       <section className={styles.hero}>
-        <div className={styles.heroGrid} aria-hidden="true" />
-        <div className={styles.heroInner}>
-          <div className={styles.heroCopy}>
-            <span className={styles.heroEyebrow}><i /> IDENTITY OPERATIONS FOR CAMPUS</span>
-            <h1>Make every identity <span>count.</span></h1>
-            <p>
-              A clearer way to enroll people, verify identities, and keep campus
-              workflows moving, with CogniFace.
-            </p>
-            <div className={styles.heroActions}>
-              <Link to="/signup" className={styles.primaryButton}>
-                Create a new account <FaArrowRight />
-              </Link>
-              <Link to="/login" className={styles.textButton}>Sign in <FaArrowRight /></Link>
-            </div>
-            <div className={styles.heroFootnote}>
-              <FaLock /> Built for thoughtful, privacy-conscious identity workflows
+        <div className={styles.heroFrame}>
+          <FaceDemo />
+          <div className={styles.heroInner}>
+            <div className={styles.heroCopy}>
+              <span className={styles.heroEyebrow}><i /> AI IDENTITY PLATFORM</span>
+              <h1>Your Face.<br />Your Identity.<br /><span>Verified.</span></h1>
+              <p>
+                A smarter way to enroll and verify identities using facial recognition
+                technology. Register your face, perform identity checks and experience
+                intelligent face matching through one simple platform.
+              </p>
+              <div className={styles.heroActions}>
+                <Link to="/enrollment" className={styles.primaryButton}>
+                  Start Enrollment <span><FaArrowRight /></span>
+                </Link>
+                <Link to="/verification" className={styles.textButton}>
+                  Explore Verification <FaArrowRight />
+                </Link>
+              </div>
+              <div className={styles.heroProof}>
+                <span><FaLock /> Protected session access</span>
+                <span><FaFingerprint /> InsightFace + FAISS matching</span>
+              </div>
             </div>
           </div>
-          <WorkspacePreview />
         </div>
-        <a className={styles.scrollCue} href="#platform">
-          <span>EXPLORE THE PLATFORM</span><FaArrowDown />
-        </a>
-        <div className={styles.heroIndex} aria-hidden="true">CF&nbsp; / &nbsp;01—03</div>
       </section>
 
-      <section className={styles.platformIntro} id="platform">
-        <div className={styles.platformLabel}>
-          <span className={styles.sectionIndex}>01</span>
-          <span>THE PLATFORM</span>
-        </div>
-        <div className={styles.platformStatement}>
-          <h2>From the first record to the final result.</h2>
+      <section className={styles.introSection} id="about" data-reveal>
+        <span className={styles.sectionLabel}><i /> THE COGNIFACE PLATFORM</span>
+        <div className={styles.introGrid}>
+          <h2>Everything starts with your face.</h2>
           <p>
-            Identity work should feel connected. CogniFace brings enrollment,
-            verification, and workspace oversight into one considered flow.
+            CogniFace brings face enrollment and identity verification together in one
+            platform. Create your facial identity profile and use it when you need to
+            verify a person&apos;s identity.
           </p>
         </div>
-        <div className={styles.platformRule}><span /></div>
+        <div className={styles.introFoot}>
+          <span>ENROLLMENT</span><i /><span>FACE FEATURES</span><i /><span>VERIFICATION</span>
+        </div>
       </section>
 
-      <section className={styles.workflowSection}>
-        <div className={styles.workflowHeading}>
-          <div>
-            <span className={styles.sectionKicker}>A BETTER WAY TO WORK</span>
-            <h2>Three steps.<br />One connected system.</h2>
-          </div>
-          <p>Give your team a consistent way to create records and make identity checks without losing sight of the work.</p>
+      <section className={styles.platformSection} id="platform" data-reveal>
+        <div className={styles.sectionHeading}>
+          <div><span className={styles.sectionLabel}>EXPLORE THE PLATFORM</span><h2>Identity tools, connected.</h2></div>
+          <p>Explore the public guides, then sign in to use the protected workspace features.</p>
         </div>
+        <div className={styles.featureGrid}>
+          {platformFeatures.map(feature => {
+            const Icon = feature.icon;
+            return (
+              <article key={feature.number}>
+                <span className={styles.featureNumber}>{feature.number}</span>
+                <span className={styles.featureIcon}><Icon /></span>
+                <h3>{feature.title}</h3>
+                <p>{feature.copy}</p>
+                <Link to={feature.to}>{feature.action}<FaArrowRight /></Link>
+              </article>
+            );
+          })}
+        </div>
+      </section>
 
-        <div className={styles.workflowList}>
-          {workflows.map(({ number, icon: Icon, title, description, label, to }) => (
-            <Link to={to} className={styles.workflowRow} key={number}>
-              <span className={styles.workflowNumber}>{number}</span>
-              <span className={styles.workflowIcon}><Icon /></span>
-              <div className={styles.workflowCopy}>
-                <span>{label}</span>
-                <h3>{title}</h3>
-                <p>{description}</p>
-              </div>
-              <span className={styles.workflowArrow}><FaArrowRight /></span>
-            </Link>
+      <section className={styles.workflowSection} id="how-it-works" data-reveal>
+        <div className={styles.workflowHeading}>
+          <span className={styles.sectionLabel}>HOW IT WORKS</span>
+          <h2>From enrollment to verification.</h2>
+          <p>A practical view of the existing face-processing workflow.</p>
+        </div>
+        <div className={styles.workflowSteps}>
+          {workflow.map(([number, title, copy], index) => (
+            <article key={number} style={{ "--step-index": index }}>
+              <span className={styles.stepNumber}>{number}</span>
+              <div className={styles.stepIcon}>{index === 0 ? <FaUserPlus /> : index === 1 ? <FaFingerprint /> : <FaCheck />}</div>
+              <h3>{title}</h3>
+              <p>{copy}</p>
+            </article>
           ))}
         </div>
       </section>
 
-      <section className={styles.securitySection}>
-        <div className={styles.securityMark}><FaFingerprint /></div>
-        <div className={styles.securityCopy}>
-          <span className={styles.sectionKicker}>SECURITY IS PART OF THE FLOW</span>
-          <h2>Designed to protect the work behind every check.</h2>
-          <p>
-            CogniFace keeps access and refresh tokens in HttpOnly session
-            cookies, while image-quality checks are built into the enrollment
-            experience.
-          </p>
-          <Link to="/ourblog" className={styles.securityLink}>Read blog<FaArrowRight /></Link>
+      <section className={styles.technologyStrip} data-reveal>
+        <div><span className={styles.sectionLabel}>BUILT WITH THE PROJECT&apos;S ACTUAL STACK</span><h2>Clear steps. Real backend results.</h2></div>
+        <div className={styles.stackList} aria-label="Application technologies">
+          {["React", "FastAPI", "InsightFace", "FAISS"].map(item => <span key={item}>{item}</span>)}
         </div>
-        <div className={styles.securityFacts}>
-          <div><span>01</span><strong>Protected sessions</strong><small>Tokens are stored in HttpOnly cookies</small></div>
-          <div><span>02</span><strong>Quality checks</strong><small>Better image inputs for enrollment</small></div>
-          <div><span>03</span><strong>Clear workflows</strong><small>People, records, and results in context</small></div>
-        </div>
+        <p>Enrollment and verification requests are processed by the authenticated application backend.</p>
       </section>
 
-      <section className={styles.finalSection}>
-        <div className={styles.finalOrbit} aria-hidden="true"><span /><span /><span /></div>
-        <div className={styles.finalCopy}>
-          <span className={styles.heroEyebrow}><i /> START WITH A CLEARER WORKFLOW</span>
-          <h2>Make room for better identity decisions.</h2>
-          <p>Create a CogniFace account and bring your campus identity workflow into focus.</p>
-        </div>
-        <Link to="/signup" className={styles.finalButton}>Get started <FaArrowRight /></Link>
+      <section className={styles.finalSection} data-reveal>
+        <div><span className={styles.sectionLabel}>READY TO GET STARTED?</span><h2>Explore your facial recognition workspace.</h2><p>Create an account to begin enrollment and access identity verification.</p></div>
+        <Link to="/signup" className={styles.finalButton}>Get Started <span><FaArrowRight /></span></Link>
       </section>
 
-      <footer className={styles.footer}>
-        <span>© {new Date().getFullYear()} CogniFace</span>
-        <span>Identity workflows, made clearer.</span>
-        <Link to="/ourblog">Explore our blog <FaArrowRight /></Link>
-      </footer>
+      <PublicFooter />
     </main>
   );
 }

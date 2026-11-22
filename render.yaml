@@ -8,3 +8,7 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: AUTH_COOKIE_SECURE
+        value: "true"
+      - key: AUTH_COOKIE_SAMESITE
+        value: none
